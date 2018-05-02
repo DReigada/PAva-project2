@@ -11,13 +11,13 @@
 ;     )
 
 (define (find-token str token-list)
-    (and
-        (not (null? token-list))
-        (let ([token-pair (car token-list)])
-            (if (starts-with? str (car token-pair))
-                (cdr token-pair)
-                (find-token str (cdr token-list))
-            ))))
+    (match token-list
+        ['() #f]
+        [(cons (cons token function) tail-list)
+            (if (starts-with? str token)
+                function
+                (find-token str tail-list)
+            )]))
 
 (define (starts-with? str expr)
     (let   ([expr-length (string-length expr)]
