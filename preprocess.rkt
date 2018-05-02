@@ -1,36 +1,32 @@
 #lang racket
-(provide add-active-token def-active-token); process-string)
-(provide get-token-list find-token); TODO remove this
+(provide add-active-token def-active-token process-string)
 
 (define *token-list* '())
 
 (define (add-active-token token function)
     (set! *token-list* (cons (cons token function) *token-list*)))
 
-; (define (process-string str)
-;     )
-
-(define (find-token str token-list)
-    (match token-list
-        ['() #f]
-        [(cons (cons token function) tail-list)
-            (if (starts-with? str token)
-                function
-                (find-token str tail-list)
-            )]))
-
-(define (starts-with? str expr)
-    (let   ([expr-length (string-length expr)]
-            [str-length (string-length str)])
-        (and 
-            (>= str-length expr-length)
-            (string=?
-                (substring str 0 (string-length expr))
-                expr))))
-
-
 (define-syntax-rule (def-active-token token parameters body)
     (add-active-token token (lambda parameters body)))
 
 
-(define (get-token-list) *token-list*)
+(define (process-string str) (proccess-aux str ""))
+
+(define/match (proccess-aux str acc)
+    [("" _) acc]
+    [(str acc)
+        (match (find-token str)
+            ['()
+                (proccess-aux (substring str 1) (string-append acc (substring str 0 1)))] 
+            [(cons token token-function)
+                (proccess-aux (token-function (substring str (string-length token))) acc)])])
+
+(define (find-token str) (find-token-aux str *token-list*))
+
+(define/match (find-token-aux str token-list)
+    [(_ '()) '()]
+    [(str (cons token-pair tail-list))
+        (if (string-prefix? str (car token-pair))
+            token-pair
+            (find-token-aux str tail-list)
+        )])
