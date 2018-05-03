@@ -39,3 +39,6 @@
     (match str
         [(regexp #rx".*=.*new (.*)\\(.*\\).*;$" (list _ type))
             (string-append type str)]))
+
+;; 2.2 String Interpolation
+(def-active-token "#" (str) (regexp-replace* #rx"\\#\\{(.*?)\\}" str "\" + (\\1) + \""))
