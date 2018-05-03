@@ -9,8 +9,8 @@
 (define-syntax-rule (def-active-token token parameters body)
     (add-active-token token (lambda parameters body)))
 
-
 (define (process-string str) (proccess-aux str ""))
+
 
 (define/match (proccess-aux str acc)
     [("" _) acc]
@@ -30,3 +30,12 @@
             token-pair
             (find-token-aux str tail-list)
         )])
+
+
+;; Defined active tokens
+
+;; 2.1 Local Type Inference
+(def-active-token "var" (str)
+    (match str
+        [(regexp #rx".*=.*new (.*)\\(.*\\).*;$" (list _ type))
+            (string-append type str)]))
