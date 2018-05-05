@@ -37,8 +37,14 @@
 ;; 2.1 Local Type Inference
 (def-active-token "var" (str)
     (match str
-        [(regexp #rx".*=.*new (.*)\\(.*\\).*;$" (list _ type))
+        [(regexp #px".*=.*new (.*)\\(.*\\).*;$" (list _ type))
             (string-append type str)]))
 
 ;; 2.2 String Interpolation
-(def-active-token "#" (str) (regexp-replace* #rx"\\#\\{(.*?)\\}" str "\" + (\\1) + \""))
+(def-active-token "#" (str)
+    (match-let* ([(cons (cons start end) _) (regexp-match-positions #px"\"(?:(?=(\\\\?))\\1.)*?\"" str)]
+                 [first-string (substring str start end)]
+                 [tail-string (substring str end)])
+        (string-append 
+            (regexp-replace* #rx"\\#\\{(.*?)\\}" first-string "\" + (\\1) + \"")
+            tail-string)))

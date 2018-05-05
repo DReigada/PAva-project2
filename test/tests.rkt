@@ -36,3 +36,7 @@
 (define string-interpolation1 "String str = #\"First #{a}, then #{a+b}, finally #{b*c}.\";")
 (define string-interpolation-expected1 "String str = \"First \" + (a) + \", then \" + (a+b) + \", finally \" + (b*c) + \".\";")
 (check-equal? (process-string string-interpolation1) string-interpolation-expected1 "Type inference 1")
+
+(define string-interpolation2 "String str = #\"First #{a}, then #{a+b}, finally #{b*c}.\" + #\"no replace #{noreplace}\";")
+(define string-interpolation-expected2 "String str = \"First \" + (a) + \", then \" + (a+b) + \", finally \" + (b*c) + \".\" + \"no replace \" + (noreplace) + \"\";")
+(check-equal? (process-string string-interpolation2) string-interpolation-expected2 "String interpolation 2")
