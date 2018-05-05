@@ -35,10 +35,10 @@
 ;; Defined active tokens
 
 ;; 2.1 Local Type Inference
-(def-active-token "var" (str)
+(def-active-token "var " (str)
     (match str
-        [(regexp #px".*=.*new (.*)\\(.*\\).*;$" (list _ type))
-            (string-append type str)]))
+        [(regexp #px".*=.*new (.*)\\(.*\\).*;" (list _ type))
+            (string-append type " " str)]))
 
 ;; 2.2 String Interpolation
 (def-active-token "#" (str)
