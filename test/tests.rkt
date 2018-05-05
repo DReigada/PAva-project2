@@ -40,3 +40,23 @@
 (define string-interpolation2 "String str = #\"First #{a}, then #{a+b}, finally #{b*c}.\" + #\"no replace #{noreplace}\";")
 (define string-interpolation-expected2 "String str = \"First \" + (a) + \", then \" + (a+b) + \", finally \" + (b*c) + \".\" + \"no replace \" + (noreplace) + \"\";")
 (check-equal? (process-string string-interpolation2) string-interpolation-expected2 "String interpolation 2")
+
+;; 2.3 Type Aliases
+(define alias-string-type1
+#<<END
+alias Cache = ConcurrentSkipListMap<String,List<Map<String,Object>>>;
+public static Cache mergeCaches(Cache a, Cache b) {
+    Cache temp = new Cache();
+}
+END
+)
+    
+(define type-alias-expected1
+#<<END
+public static ConcurrentSkipListMap<String,List<Map<String,Object>>> mergeCaches(ConcurrentSkipListMap<String,List<Map<String,Object>>> a, ConcurrentSkipListMap<String,List<Map<String,Object>>> b) {
+    ConcurrentSkipListMap<String,List<Map<String,Object>>> temp = new ConcurrentSkipListMap<String,List<Map<String,Object>>>();
+}
+END
+)
+
+(check-equal? (process-string alias-string-type1) type-alias-expected1 "Type alias 1")

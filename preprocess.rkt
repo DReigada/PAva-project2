@@ -48,3 +48,13 @@
         (string-append 
             (regexp-replace* #rx"\\#\\{(.*?)\\}" first-string "\" + (\\1) + \"")
             tail-string)))
+
+;; 2.3 Type Aliases
+(def-active-token "alias " (str)
+    (match-let ([(cons first-line remaining-lines) (string-split str "\n")])
+            (match first-line
+                [(regexp #px"[\\s]*(.*?)[\\s]*=[\\s]*(.*?)[\\s]*;" (list _ alias-name alias-type))
+                    (regexp-replace*
+                        (pregexp (string-append "(?<![\\w])" alias-name "(?![\\w])"))
+                        (string-join remaining-lines "\n")
+                        alias-type)])))
