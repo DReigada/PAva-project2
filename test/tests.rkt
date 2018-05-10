@@ -53,6 +53,7 @@ END
     
 (define type-alias-expected1
 #<<END
+
 public static ConcurrentSkipListMap<String,List<Map<String,Object>>> mergeCaches(ConcurrentSkipListMap<String,List<Map<String,Object>>> a, ConcurrentSkipListMap<String,List<Map<String,Object>>> b) {
     ConcurrentSkipListMap<String,List<Map<String,Object>>> temp = new ConcurrentSkipListMap<String,List<Map<String,Object>>>();
 }
@@ -74,6 +75,7 @@ END
 
 (define token-mix-expected1
 #<<END
+
 public static ConcurrentSkipListMap<String,List<Map<String,Object>>> mergeCaches(ConcurrentSkipListMap<String,List<Map<String,Object>>> a, ConcurrentSkipListMap<String,List<Map<String,Object>>> b) {
     ConcurrentSkipListMap<String,List<Map<String,Object>>> temp = new ConcurrentSkipListMap<String,List<Map<String,Object>>>();
 }
