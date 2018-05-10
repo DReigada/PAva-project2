@@ -1,6 +1,7 @@
 #lang racket
  
-(require rackunit "preprocess.rkt")
+(require rackunit
+         "../preprocess.rkt")
 
 (define (process-file file-path output-suffix)
     (display-to-file
@@ -32,13 +33,11 @@
 
 
 
-
-
 (define (process-and-verify-directory directory)
     (process-directory directory ".in" ".out")
     (verify-directory directory))
 
-(process-and-verify-directory "20180507app2tests/simple/string-interpolation")
-(process-and-verify-directory "20180507app2tests/simple/type-alias")
-(process-and-verify-directory "20180507app2tests/simple/mixed-tokens")
-(process-and-verify-directory "20180507app2tests/simple/type-inference")
+(process-and-verify-directory "provided/string-interpolation")
+(process-and-verify-directory "provided/type-alias")
+(process-and-verify-directory "provided/mixed-tokens")
+(process-and-verify-directory "provided/type-inference")
