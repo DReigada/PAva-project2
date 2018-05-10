@@ -35,10 +35,10 @@
 ;; Defined active tokens
 
 ;; 2.1 Local Type Inference
-(def-active-token "var " (str)
+(def-active-token "var " (str) 
     (match str
-        [(regexp #px".*=.*new (.*)\\(.*\\).*;" (list _ type))
-            (string-append type " " str)]))
+            [(regexp #px".*?=.*?new (.*?)\\(.*\\).*" (list a type))
+                (string-append type " " str)]))
 
 ;; 2.2 String Interpolation
 (def-active-token "#" (str)
@@ -51,10 +51,12 @@
 
 ;; 2.3 Type Aliases
 (def-active-token "alias " (str)
-    (match-let ([(cons first-line remaining-lines) (string-split str "\n")])
-            (match first-line
-                [(regexp #px"[\\s]*(.*?)[\\s]*=[\\s]*(.*?)[\\s]*;" (list _ alias-name alias-type))
-                    (regexp-replace*
-                        (pregexp (string-append "(?<![\\w])" alias-name "(?![\\w])"))
-                        (string-join remaining-lines "\n")
-                        alias-type)])))
+    (match-let* ([(cons (cons first-alias _) _) (regexp-match-positions ";" str)]
+                [first-line (substring str 0 (+ first-alias 1))]
+                [remaining-lines (substring str (+ 1 first-alias))])
+        (match first-line
+            [(regexp #px"[\\s]*(.*?)[\\s]*=[\\s]*(.*?)[\\s]*;" (list _ alias-name alias-type))
+                (regexp-replace*
+                    (pregexp (string-append "(?<![\\w])" alias-name "(?![\\w])"))
+                    remaining-lines
+                    alias-type)])))
