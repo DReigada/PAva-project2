@@ -1,6 +1,5 @@
 #lang racket
- 
-(require "preprocess.rkt")
+(provide process-setters process-getters process-getters-and-setters)
 
 (define input
 #<<END
@@ -8,7 +7,7 @@
 @Getters
 public class Test {
     public String str;
-    public int int;
+    public int num;
 }
 END
 )
@@ -61,6 +60,10 @@ END
     (regexp-match* #px"public ([\\S]*) ([^\\(\\s;]*)[^\\(]*?\n" str start (+ end 1) #:match-select cdr))
 
 
+(define (add-margin str margin)
+    (string-join (string-split str "\n") (string-append "\n" margin) #:before-first margin))
+
+
 (define setter-template
 #<<END
 public void set~a(~a ~a) {
@@ -69,8 +72,8 @@ public void set~a(~a ~a) {
 END
 )
 
-(define (create-setter type name)
-    (format setter-template name type name name name))
+(define (create-setter margin type name)
+    (add-margin (format setter-template name type name name name) margin))
 
 
 (define getter-template
@@ -81,20 +84,25 @@ public ~a get~a() {
 END
 )
 
-(define (create-getter type name)
-    (format getter-template type name name))
+(define (create-getter margin type name)
+    (add-margin (format getter-template type name name) margin))
 
 ;; get class limits
 ;; find attributes
 ;; generate getters and setters
 ;; insert getters and setters
-
-
-(define (test str)
+(define (process-class-with-function str create-func)
     (match-define-values (class-start class-end) (find-start/closing-bracket str))
     (define attributes (find-class-attributes str class-start class-end))
-    (for/fold ([acc ""]) ([attribute attributes])
-        (match-define (list type name) attribute)
-        (string-join (list acc (create-setter type name) (create-getter type name)) "\n\n")))
+    (define created-functions
+        (for/fold ([acc ""]) ([attribute attributes])
+            (match-define (list type name) attribute)
+            (string-join (list acc (create-func "  " type name)) "\n\n")))
+    (string-append (substring str 0 class-end) created-functions "\n" (substring str class-end)))
 
-(displayln (test input))
+
+(define (process-setters str) (process-class-with-function str create-setter))
+(define (process-getters str) (process-class-with-function str create-getter))
+(define (process-getters-and-setters str) (process-class-with-function str
+    (lambda (margin type name)
+        (string-append (create-getter margin type name) "\n\n" (create-setter margin type name)))))
