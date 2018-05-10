@@ -12,14 +12,17 @@
 (define (process-string str) (proccess-aux str ""))
 
 
-(define/match (proccess-aux str acc)
-    [("" _) acc]
-    [(str acc)
-        (match (find-token str)
-            ['()
-                (proccess-aux (substring str 1) (string-append acc (substring str 0 1)))] 
-            [(cons token token-function)
-                (proccess-aux (token-function (substring str (string-length token))) acc)])])
+(define (proccess-aux str acc)
+    (cond
+        [(equal? str "") acc]
+        [(and (> (string-length acc) 0) (regexp-match #px"\\w" (substring acc (- (string-length acc) 1))))
+            (proccess-aux (substring str 1) (string-append acc (substring str 0 1)))]
+        [else
+            (match (find-token str)
+                ['()
+                    (proccess-aux (substring str 1) (string-append acc (substring str 0 1)))] 
+                [(cons token token-function)
+                    (proccess-aux (token-function (substring str (string-length token))) acc)])]))
 
 (define (find-token str) (find-token-aux str *token-list*))
 
