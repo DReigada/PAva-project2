@@ -61,12 +61,13 @@
 
 ;; 2.3 Type Aliases
 (def-active-token "alias " (str)
-    (match-let* ([(cons (cons first-alias _) _) (regexp-match-positions ";" str)]
-                [first-line (substring str 0 (+ first-alias 1))]
-                [remaining-lines (substring str (+ 1 first-alias))])
-        (match first-line
+    (match-let* ([(cons (cons first-alias-end _) _) (regexp-match-positions ";" str)]
+                [alias-definition (substring str 0 (+ first-alias-end 1))]
+                [remaining-lines (substring str (+ 1 first-alias-end))])
+        (match alias-definition
             [(regexp #px"[\\s]*(.*?)[\\s]*=[\\s]*(.*?)[\\s]*;" (list _ alias-name alias-type))
                 (regexp-replace*
                     (pregexp (string-append "(?<![\\w])" alias-name "(?![\\w])"))
                     remaining-lines
-                    alias-type)])))
+                    alias-type)]
+            [str (error (string-append "Invalid `alias` syntax in: alias " str))])))
