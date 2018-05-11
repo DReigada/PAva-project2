@@ -1,42 +1,6 @@
 #lang racket
 (provide process-setters process-getters process-getters-and-setters)
 
-(define input
-#<<END
-@Setters
-@Getters
-public class Test {
-    public String str;
-    public int num;
-}
-END
-)
-
-(define output
-#<<END
-public class Test {
-    public String str;
-    public int num;
-
-    public void setstr(String str){
-        this.str = str;
-    }
-
-    public void setnum(String num){
-        this.num = num;
-    }
-
-    public String getstr(){
-        return str;
-    }
-
-    public int getint(){
-        return int;
-    }
-}
-END
-)
-
 (define (find-start/closing-bracket str)
     (match-let*-values ([((cons (cons first-position _) _)) (regexp-match-positions #px"\\{" str)]
                         [(_ bracket-position) (find-closing-bracket-aux (substring str first-position))])
