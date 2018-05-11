@@ -12,10 +12,13 @@
 (define (process-string str) (proccess-aux str ""))
 
 
+(define (string-ends-with-non-whitespace? str)
+    (and (> (string-length str) 0) (regexp-match #px"\\w" (substring str (- (string-length str) 1)))))
+
 (define (proccess-aux str acc)
     (cond
         [(equal? str "") acc]
-        [(and (> (string-length acc) 0) (regexp-match #px"\\w" (substring acc (- (string-length acc) 1))))
+        [(string-ends-with-non-whitespace? acc)
             (proccess-aux (substring str 1) (string-append acc (substring str 0 1)))]
         [else
             (match (find-token str)
@@ -40,12 +43,16 @@
 ;; 2.1 Local Type Inference
 (def-active-token "var " (str) 
     (match str
-            [(regexp #px".*?=.*?new (.*?)\\(.*\\).*" (list a type))
-                (string-append type " " str)]))
+            [(regexp #px".*?=.*?new (.*?)\\(.*\\).*" (list _ type))
+                (string-append type " " str)]
+            [str (error (string-append "Invalid `var` syntax in: var " str))]))
 
 ;; 2.2 String Interpolation
+(define (match-string-start-end str)
+    (car (regexp-match-positions #px"\"(?:(?=(\\\\?))\\1.)*?\"" str)))
+
 (def-active-token "#" (str)
-    (match-let* ([(cons (cons start end) _) (regexp-match-positions #px"\"(?:(?=(\\\\?))\\1.)*?\"" str)]
+    (match-let* ([(cons start end) (match-string-start-end str)]
                  [first-string (substring str start end)]
                  [tail-string (substring str end)])
         (string-append 
