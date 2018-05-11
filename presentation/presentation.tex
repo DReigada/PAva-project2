@@ -1,0 +1,157 @@
+\documentclass[13pt]{beamer}
+
+\usepackage{pgfpages}
+\usepackage{minted}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usetheme{default} % or try Darmstadt, Madrid, Warsaw, ...
+\usecolortheme{default} % or try albatross, beaver, crane, ...
+\usefonttheme{default} % or try serif, structurebold, ...
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}[numbered]
+
+
+% For presenter notes
+%\setbeameroption{show notes on second screen}
+
+
+\addtobeamertemplate{navigation symbols}{}{%
+  \usebeamerfont{footline}%
+  \usebeamercolor[fg]{footline}%
+  \hspace{1em}%
+  \insertframenumber/\inserttotalframenumber
+  }
+
+\newcommand\Wider[2][3em]{%
+\makebox[\linewidth][c]{%
+  \begin{minipage}{\dimexpr\textwidth+#1\relax}
+  \raggedright#2
+  \end{minipage}%
+  }%
+}
+  
+\title{Language agnostic pre-processor}
+\author{Daniel Reigada - 82064}
+\institute{IST - Advanced Programming}
+\date{May 14, 2018}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+  \note{
+    I will start by presenting how I implemented my solution and then I will show the extensions I've made
+  }
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}[fragile]{Token definition and storage}
+  \note{
+    The tokens are stored in a list of pairs,
+    that contain the token string and the function
+  }
+  \begin{minted}[fontsize=\footnotesize]{racket}
+    (define *token-list* '())
+
+    (define (add-active-token token function)
+        (set! *token-list* (cons (cons token function) *token-list*)))
+
+    (define-syntax-rule (def-active-token token parameters body)
+        (add-active-token token (lambda parameters body)))
+
+    (define (process-string str) (proccess-aux str ""))
+
+  \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Process function}
+  \note{
+    The processing function is calls it self recursivly until it
+    reaches the end of the string, advancing one character at a time
+    until it finds a token.
+    When a token is found the respective function is called and its
+    output is used to continue the recursive process.
+  }
+  \begin{minted}[fontsize=\footnotesize]{racket}
+    (define (proccess-aux str acc)
+      (cond
+        [(equal? str "") acc]
+        [(string-ends-with-non-whitespace? acc)
+          (proccess-aux (substring str 1)
+            (string-append acc (substring str 0 1)))]
+        [else
+          (match (find-token str)
+            ['()
+              (proccess-aux (substring str 1)
+                (string-append acc (substring str 0 1)))] 
+            [(cons token token-function)
+              (proccess-aux
+                (token-function (substring str (string-length token))
+                acc)])]))
+ \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Finding tokens}
+  \note{
+    Another recursive function that checks if the string starts with
+    the first token in the list, if not call itself with the tail of the list
+    until the token list is empty
+  }
+  \begin{minted}[fontsize=\footnotesize]{racket}
+    (define/match (find-token-aux str token-list)
+      [(_ '()) '()]
+      [(str (cons token-pair tail-list))
+        (if (string-prefix? str (car token-pair))
+          token-pair
+          (find-token-aux str tail-list)
+        )])
+ \end{minted}
+\end{frame}
+
+
+\begin{frame}[fragile]{Local Type Inference}
+  \note{
+    Another recursive function that checks if the string starts with
+    the first token in the list, if not call itself with the tail of the list
+    until the token list is empty
+  }
+  \begin{minted}[fontsize=\footnotesize]{racket}
+    (def-active-token "var " (str) 
+      (match str
+        [(regexp #px".*?=.*?new (.*?)\\(.*\\).*" (list _ type))
+          (string-append type " " str)]
+        [str (error
+          (string-append "Invalid `var` syntax in: var " str))]))
+ \end{minted}
+\end{frame}
+
+
+\begin{frame}[fragile]{Local Type Inference}
+  \note{
+    Another recursive function that checks if the string starts with
+    the first token in the list, if not call itself with the tail of the list
+    until the token list is empty
+  }
+  \begin{minted}[fontsize=\footnotesize]{racket}
+    (define (match-string-start-end str)
+      (car (regexp-match-positions
+        #px"\"(?:(?=(\\\\?))\\1.)*?\""
+        str)))
+
+    (def-active-token "#" (str)
+      (match-let* ([(cons start end) (match-string-start-end str)]
+                    [first-string (substring str start end)]
+                    [tail-string (substring str end)])
+          (string-append 
+            (regexp-replace* #rx"\\#\\{(.*?)\\}"
+              first-string
+              "\" + (\\1) + \"")
+            tail-string)))
+
+ \end{minted}
+\end{frame}
+\end{document}
