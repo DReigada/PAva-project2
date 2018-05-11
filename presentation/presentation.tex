@@ -177,7 +177,7 @@
  \end{minted}
 \end{frame}
 
-\begin{frame}[fragile]{Java getters and setters}
+\begin{frame}[fragile]{Java - Cutting down the boilerplate (extension)}
   \note{
     
   }
@@ -191,7 +191,7 @@
             public int num;
         }
      \end{minted}
-    \column{0.65\textwidth}
+    \column{0.70\textwidth}
       \begin{minted}[fontsize=\footnotesize]{java}
         public class Test {
           public String str;
@@ -219,7 +219,37 @@
 
 \end{frame}
 
-\begin{frame}[fragile]{Java getters and setters}
+\begin{frame}[fragile]{Java - Cutting down the boilerplate (extension)}
+  \note{
+    
+  }
+  \begin{columns}
+    \column{0.4\textwidth}
+      \begin{minted}[fontsize=\footnotesize]{java}
+        @Constructor
+        public class Test {
+          public String str;
+          public int num;
+      }
+     \end{minted}
+    \column{0.70\textwidth}
+      \begin{minted}[fontsize=\footnotesize]{java}
+        public class Test {
+          public String str;
+          public int num;
+      
+          public Test(String str, int num) {
+            this.str = str;
+            this.num = num;
+            this.num2 = num2;
+          }
+        }
+      \end{minted}
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}[fragile]{Java - Cutting down the boilerplate (extension)}
   \note{
     
   }
@@ -227,8 +257,8 @@
   \begin{enumerate}
     \item Find class limits
     \item Find attributes
-    \item Generate getters and setters from the attributes
-    \item Insert getters and setters
+    \item Generate getters, setters and constructors from the attributes
+    \item Insert the generated methods
   \end{enumerate}
 \end{frame}
 
