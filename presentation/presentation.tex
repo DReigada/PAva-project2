@@ -115,9 +115,7 @@
 
 \begin{frame}[fragile]{Local Type Inference}
   \note{
-    Another recursive function that checks if the string starts with
-    the first token in the list, if not call itself with the tail of the list
-    until the token list is empty
+    
   }
   \begin{minted}[fontsize=\footnotesize]{racket}
     (def-active-token "var " (str) 
@@ -132,9 +130,7 @@
 
 \begin{frame}[fragile]{Local Type Inference}
   \note{
-    Another recursive function that checks if the string starts with
-    the first token in the list, if not call itself with the tail of the list
-    until the token list is empty
+    
   }
   \begin{minted}[fontsize=\footnotesize]{racket}
     (define (match-string-start-end str)
@@ -154,4 +150,86 @@
 
  \end{minted}
 \end{frame}
+
+\begin{frame}[fragile]{Type Aliases}
+  \note{
+    
+  }
+  \begin{minted}[fontsize=\footnotesize]{racket}
+    (def-active-token "alias " (str)
+      (match-let* (
+          [(cons (cons first-alias-end _) _)
+            (regexp-match-positions ";" str)]
+          [alias-definition (substring str 0 (+ first-alias-end 1))]
+          [remaining-lines (substring str (+ 1 first-alias-end))])
+        (match alias-definition
+          [(regexp
+              #px"[\\s]*(.*?)[\\s]*=[\\s]*(.*?)[\\s]*;"
+              (list _ alias-name alias-type))
+            (regexp-replace*
+              (pregexp
+                (string-append "(?<![\\w])" alias-name "(?![\\w])"))
+              remaining-lines
+              alias-type)]
+          [str (error (string-append
+                "Invalid `alias` syntax in: alias " str))])))
+
+ \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Java getters and setters}
+  \note{
+    
+  }
+  \begin{columns}
+    \column{0.4\textwidth}
+      \begin{minted}[fontsize=\footnotesize]{java}
+        @Setters
+        @Getters
+        public class Test {
+            public String str;
+            public int num;
+        }
+     \end{minted}
+    \column{0.65\textwidth}
+      \begin{minted}[fontsize=\footnotesize]{java}
+        public class Test {
+          public String str;
+          public int num;
+
+          public void setstr(String str) {
+              this.str = str;
+          }
+
+          public void setnum(int num) {
+              this.num = num;
+          }
+
+
+          public String getstr() {
+              return this.str;
+          }
+
+          public int getnum() {
+              return this.num;
+          }
+        }
+      \end{minted}
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}[fragile]{Java getters and setters}
+  \note{
+    
+  }
+  
+  \begin{enumerate}
+    \item Find class limits
+    \item Find attributes
+    \item Generate getters and setters from the attributes
+    \item Insert getters and setters
+  \end{enumerate}
+\end{frame}
+
 \end{document}
